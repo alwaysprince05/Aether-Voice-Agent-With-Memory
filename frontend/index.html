@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHER · J.A.R.V.I.S. Interface</title>
+    <meta name="description" content="AETHER — a JARVIS-inspired voice AI agent with memory, task management, and intelligent conversation.">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Boot Sequence Overlay -->
+    <div class="boot-overlay" id="boot-overlay">
+        <div class="boot-text" id="boot-text">INITIALIZING AETHER...</div>
+        <div class="boot-bar"><div class="boot-bar-fill"></div></div>
+    </div>
+
+    <!-- Scanline Overlay -->
+    <div class="scanlines"></div>
+
+    <!-- HUD Top Bar -->
+    <div class="hud-bar">
+        <div class="hud-left">
+            <span class="hud-indicator"><span class="dot"></span> ONLINE</span>
+            <span>MODEL: LLAMA-3.1</span>
+        </div>
+        <div class="hud-center">A E T H E R</div>
+        <div class="hud-right">
+            <span id="hud-clock">00:00:00</span>
+            <span>v2.0</span>
+        </div>
+    </div>
+
+    <!-- Particle Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Ambient Background Effects -->
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="grid-lines"></div>
+    </div>
+
+    <!-- Floating 3D Geometric Objects -->
+    <div class="floating-objects">
+        <div class="geo geo-cube"><div class="cube"><div class="face front"></div><div class="face back"></div><div class="face left"></div><div class="face right"></div><div class="face top"></div><div class="face bottom"></div></div></div>
+        <div class="geo geo-ring"></div>
+        <div class="geo geo-diamond"></div>
+        <div class="geo geo-sphere"></div>
+    </div>
+
+    <!-- Main Bento Grid Layout -->
+    <div class="bento-grid">
+
+        <!-- Brand Cell -->
+        <div class="bento-cell cell-brand" id="cell-brand">
+            <div class="brand-inner">
+                <div class="aether-logo">
+                    <div class="logo-ring">
+                        <svg viewBox="0 0 100 100" class="ring-svg">
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00f0ff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#0080ff;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(0,240,255,0.1)" stroke-width="1"/>
+                            <circle cx="50" cy="50" r="42" fill="none" stroke="url(#grad1)" stroke-width="1.5" stroke-dasharray="8 4" class="logo-orbit"/>
+                            <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(0,128,255,0.3)" stroke-width="1" stroke-dasharray="4 6" style="animation:spinSlow 15s linear infinite reverse"/>
+                            <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(0,240,255,0.15)" stroke-width="0.5" stroke-dasharray="2 8"/>
+                        </svg>
+                        <div class="logo-core">
+                            <i class="fa-solid fa-atom"></i>
+                        </div>
+                    </div>
+                </div>
+                <h1 class="brand-name">AETHER</h1>
+                <p class="brand-tag">Voice AI Agent</p>
+            </div>
+        </div>
+
+        <!-- Status Cell -->
+        <div class="bento-cell cell-status" id="cell-status">
+            <div class="status-content">
+                <div class="status-live">
+                    <span class="pulse-dot"></span>
+                    <span class="status-label">System Active</span>
+                </div>
+                <div class="status-stats">
+                    <div class="stat">
+                        <span class="stat-num" id="stat-memories">0</span>
+                        <span class="stat-label">Memories</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-num" id="stat-tasks">0</span>
+                        <span class="stat-label">Tasks</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Cell (largest) -->
+        <div class="bento-cell cell-chat" id="cell-chat">
+            <div class="cell-header">
+                <div class="cell-title">
+                    <i class="fa-solid fa-messages"></i>
+                    <span>Conversation</span>
+                </div>
+                <div class="cell-actions">
+                    <button class="icon-btn" id="clear-chat-btn" title="Clear chat"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+            </div>
+            <div class="chat-container" id="chat-container">
+                <div class="message ai-message">
+                    <div class="msg-avatar"><i class="fa-solid fa-atom"></i></div>
+                    <div class="msg-body">
+                        <div class="msg-name">AETHER</div>
+                        <div class="msg-bubble">Hey there! I'm your AI assistant. Ask me anything, create tasks, or tell me things to remember.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area">
+                <div class="input-wrapper" id="input-wrapper">
+                    <input type="text" id="chat-input" placeholder="Ask AETHER anything..." autocomplete="off" spellcheck="false">
+                    <div class="input-buttons">
+                        <button id="voice-btn" class="input-btn voice-btn" title="Voice input">
+                            <i class="fa-solid fa-microphone"></i>
+                            <div class="voice-ripple"></div>
+                        </button>
+                        <button id="send-btn" class="input-btn send-btn" title="Send message">
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="listening-bar hidden" id="listening-indicator">
+                    <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+                    <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <span class="listening-text">Listening...</span>
+                    <button id="cancel-voice-btn" class="cancel-voice-btn" title="Discard recording">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Cell -->
+        <div class="bento-cell cell-tasks" id="cell-tasks">
+            <div class="cell-header">
+                <div class="cell-title">
+                    <i class="fa-solid fa-check-double"></i>
+                    <span>Tasks</span>
+                </div>
+                <span class="cell-count" id="task-count">0</span>
+            </div>
+            <div class="todo-list" id="todo-list">
+                <div class="empty-state">
+                    <i class="fa-regular fa-circle-check"></i>
+                    <p>No tasks yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Cell -->
+        <div class="bento-cell cell-memory" id="cell-memory">
+            <div class="cell-header">
+                <div class="cell-title">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Memory Bank</span>
+                </div>
+                <span class="cell-count" id="memory-count">0</span>
+            </div>
+            <div class="memory-list" id="memory-list">
+                <div class="empty-state">
+                    <i class="fa-regular fa-lightbulb"></i>
+                    <p>No memories stored</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Cell -->
+        <div class="bento-cell cell-actions-grid" id="cell-quick">
+            <div class="cell-header">
+                <div class="cell-title">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Quick Actions</span>
+                </div>
+            </div>
+            <div class="quick-actions">
+                <button class="quick-btn" data-prompt="What are my pending tasks?">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>View Tasks</span>
+                </button>
+                <button class="quick-btn" data-prompt="What do you remember about me?">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Recall</span>
+                </button>
+                <button class="quick-btn" data-prompt="Summarize my current context">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Summarize</span>
+                </button>
+                <button class="quick-btn" data-prompt="What can you help me with?">
+                    <i class="fa-regular fa-circle-question"></i>
+                    <span>Help</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
