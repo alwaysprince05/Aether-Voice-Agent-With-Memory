@@ -1,124 +1,138 @@
-# 🌌 AETHER · Voice AI Agent with Memory
+# AETHER Voice Agent
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Groq](https://img.shields.io/badge/Groq-f3d122?style=for-the-badge&logo=ai)](https://groq.com/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+Personal voice-first AI assistant project by `alwaysprince05`, built with FastAPI, Groq-compatible OpenAI SDK calls, long-term memory, and task management.
 
-**AETHER** is a premium, full-stack Voice AI Agent designed for high-performance productivity. It combines a stunning **Glassmorphic Bento Grid Dashboard** with powerful **Long-Term Memory** and **Task Management**, all powered by the lightning-fast Groq LPU inference engine.
+## What This Project Does
 
----
+`AETHER` lets you talk to an AI agent through a browser UI and get:
 
-## ✨ Key Features
+- conversational replies from an LLM
+- speech-to-text transcription for voice input
+- text-to-speech playback for AI responses
+- persistent memory storage for user facts/context
+- built-in to-do management via natural language
 
-### 📐 Premium Bento Grid Interface
-- **Modern Dashboard**: A modular, responsive Bento Grid layout inspired by 2025 design trends.
-- **Glassmorphism & Neumorphism**: Subtle frosted glass effects, depth-driven shadows, and premium "claymorphic" elements.
-- **3D Animations**: Hardware-accelerated CSS 3D objects (spinning cubes, orbiting rings) and ambient gradient orbs for a "living" UI.
+The app runs as a full-stack system:
 
-### 🧠 Intelligent Core
-- **Long-Term Memory**: Automatically stores user facts, preferences, and schedules. It "recalls" this information contextually during conversations.
-- **Natural Task Management**: Create, list, update, and complete tasks using natural language or voice commands.
-- **Voice-First Design**: Seamless browser-based microphone integration with real-time **EQ Equalizer** and **Ripple Animations**.
+- backend: `FastAPI` (`src/api.py`)
+- frontend: `HTML/CSS/JS` (`frontend/`)
+- storage: local JSON files in the configured data directory
 
-### ⚡ Performance & Scale
-- **Groq Powered**: Uses `Llama-3-70b` for reasoning and `Whisper-large-v3` for sub-second transcription.
-- **FastAPI Backend**: Robust asynchronous API handling both chat and multipart audio streams.
-- **Docker Ready**: Fully containerized for one-command deployment.
+## Core Features
 
----
+- **Voice chat pipeline**: Browser microphone -> `/api/voice` -> transcription -> agent response -> optional TTS.
+- **Text chat pipeline**: UI text input -> `/api/chat` -> agent response + base64 audio.
+- **Long-term memory**: Stores and recalls user details through `MemorySystem`.
+- **Task manager**: Create/list/update/complete tasks using `ToDoManager`.
+- **Web dashboard**: Visual cards for interactions, tasks, and memory context.
+- **Docker-ready deployment**: Run locally with `docker-compose`.
 
-## 🛠️ Technology Stack
+## Tech Stack
 
-| Layer | Technologies |
-|---|---|
-| **AI Models** | Llama 3 (Inference), Whisper-large-v3 (STT) |
-| **Backend** | Python 3.14+, FastAPI, Uvicorn |
-| **Frontend** | Vanilla JavaScript (ES6+), CSS3 (Grid & 3D), HTML5 |
-| **Infrastructure** | Docker, Docker Compose |
-| **Tools** | Groq LPU, OpenAI SDK |
+- Python `3.14+`
+- FastAPI + Uvicorn + Gunicorn
+- OpenAI Python SDK (used with Groq-compatible base URL)
+- gTTS for response audio generation
+- Vanilla JavaScript + HTML + CSS frontend
+- Docker + Docker Compose
 
----
-
-## 🚀 Quick Start
-
-### 1. Prerequisites
-- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
-- A **Groq API Key** (Get one at [console.groq.com](https://console.groq.com/))
-
-### 2. Deployment with Docker (Recommended)
-The easiest way to run AETHER is using Docker:
-
-```bash
-# Clone the repository
-git clone https://github.com/Aerospace-prog/Aether-Voice-Agent-With-Memory.git
-cd Aether-Voice-Agent-With-Memory
-
-# Configure your API key
-echo "GROQ_API_KEY=your_key_here" > .env
-
-# Launch the system
-docker-compose up -d
-```
-Access the dashboard at **[http://localhost:8000](http://localhost:8000)**.
-
-### 3. Local Development Setup
-If you prefer to run locally without Docker:
-
-```bash
-# Create and activate environment
-python -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set environment variable
-export GROQ_API_KEY=your_key_here
-
-# Start the server
-uvicorn src.api:app --reload --port 8000
-```
-
----
-
-## 📖 Usage Guide
-
-### Voice Mode
-1. Click the **Microphone** icon in the dashboard.
-2. Grant microphone permissions in your browser.
-3. Speak a command (e.g., *"Remember that I have a meeting tomorrow at 3pm"*).
-4. Click the mic again to stop. AETHER will transcribe, process, and update the UI live.
-
-### Quick Actions
-Use the **Quick Actions** bento cell for one-click access to:
-- **Recall**: Ask AETHER to summarize what it knows about you.
-- **View Tasks**: Instantly list all pending to-dos.
-- **Summarize**: Get a snapshot of your current productivity state.
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```text
 Aether-Voice-Agent-With-Memory/
 ├── src/
-│   ├── api.py           # FastAPI Web Server
-│   ├── agent_core.py    # LLM & Tool-Calling Logic
-│   ├── memory_system.py # Memory Storage & Recall
-│   ├── todo_manager.py  # Task Management CRUD
-│   └── config.py        # Env & Config Management
+│   ├── api.py
+│   ├── agent_core.py
+│   ├── memory_system.py
+│   ├── todo_manager.py
+│   ├── voice_agent.py
+│   ├── voice_interface.py
+│   ├── models.py
+│   └── config.py
 ├── frontend/
-│   ├── index.html       # Bento Grid UI
-│   ├── style.css        # Glassmorphic & 3D Styling
-│   └── app.js           # Frontend Audio & API Logic
-├── Dockerfile           # Production Container Build
-└── docker-compose.yml   # Multi-service Orchestration
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+├── tests/
+├── docs/
+├── examples/
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
 ```
 
----
+## Quick Start
 
-## ⚖️ License
-Distributed under the MIT License. See `LICENSE` for more information.
+### 1) Prerequisites
 
----
-**AETHER** — *The future of personal AI, one memory at a time.*
+- Python `3.14+` (for local run)
+- Docker + Docker Compose (optional, recommended for container run)
+- A Groq API key
+
+### 2) Environment Setup
+
+Create `.env` in the repo root:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+> Note: `docker-compose.yml` expects `GROQ_API_KEY`.
+
+### 3) Run with Docker
+
+```bash
+docker-compose up --build
+```
+
+Open: [http://localhost:8000](http://localhost:8000)
+
+### 4) Run Locally (Without Docker)
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export GROQ_API_KEY=your_groq_api_key_here
+uvicorn src.api:app --reload --port 8000
+```
+
+Open: [http://localhost:8000](http://localhost:8000)
+
+## API Endpoints
+
+- `GET /health` - service health check
+- `POST /api/chat` - text chat endpoint
+- `POST /api/voice` - voice upload/transcribe/chat endpoint
+- `GET /api/tts?text=...` - generate/stream TTS audio
+- `GET /api/todos` - list stored to-dos
+- `GET /api/memories` - list stored memories
+
+## Development Notes
+
+- Main backend entrypoint: `src/api.py`
+- Static frontend is mounted by FastAPI from `frontend/`
+- Local data persistence defaults to the configured `data_dir`
+- Unit tests are available in `tests/unit`
+
+## Running Tests
+
+```bash
+pytest
+```
+
+## Roadmap
+
+- improve memory relevance/ranking
+- add robust auth and multi-user sessions
+- enhance frontend state management and error UX
+- add CI pipeline and production deployment templates
+- expand test coverage for API routes
+
+## Ownership
+
+This repository is maintained as my personal project direction and ongoing development work.
+
+## License
+
+Use and distribution terms should follow the project license file in this repository.
