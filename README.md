@@ -1,3 +1,13 @@
+---
+title: AETHER Voice Agent
+emoji: "🤖"
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # AETHER Voice Agent
 
 Personal voice-first AI assistant project by `alwaysprince05`, built with FastAPI, Groq-compatible OpenAI SDK calls, long-term memory, and task management.
