@@ -12,6 +12,10 @@ pinned: false
 
 Personal voice-first AI assistant project by `alwaysprince05`, built with FastAPI, Groq-compatible OpenAI SDK calls, long-term memory, and task management.
 
+## Live Deployment
+
+- **View Live App**: [AETHER Voice Agent on Hugging Face](https://huggingface.co/spaces/alwaysprince05e/aether_voice_agent_with_memory)
+
 ## What This Project Does
 
 `AETHER` lets you talk to an AI agent through a browser UI and get:
@@ -139,9 +143,11 @@ pytest
 - add CI pipeline and production deployment templates
 - expand test coverage for API routes
 
-## Ownership
+## Author
 
-This repository is maintained as my personal project direction and ongoing development work.
+- **Prince Kumar Maurya** (`alwaysprince05`)
+- GitHub: [alwaysprince05](https://github.com/alwaysprince05)
+- Hugging Face: [alwaysprince05e](https://huggingface.co/alwaysprince05e)
 
 ## License
 
