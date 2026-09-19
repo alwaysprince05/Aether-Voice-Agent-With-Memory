@@ -1,0 +1,2 @@
+# Treat compiled bytecode as binary so stray .pyc files don't pollute diffs
+*.pyc binary

@@ -14,7 +14,7 @@ Personal voice-first AI assistant project by `alwaysprince05`, built with FastAP
 
 ## Live Deployment
 
-- **View Live App**: [AETHER Voice Agent on Hugging Face](https://huggingface.co/spaces/alwaysprince05e/aether_voice_agent_with_memory)
+- **View Live App**: [AETHER Voice Agent on Hugging Face](https://huggingface.co/spaces/alwaysprince05/aether_voice_agent_with_memory)
 
 ## What This Project Does
 
@@ -43,7 +43,7 @@ The app runs as a full-stack system:
 
 ## Tech Stack
 
-- Python `3.14+`
+- Python `3.10+` (3.11+ recommended)
 - FastAPI + Uvicorn + Gunicorn
 - OpenAI Python SDK (used with Groq-compatible base URL)
 - gTTS for response audio generation
@@ -85,13 +85,14 @@ Aether-Voice-Agent-With-Memory/
 
 ### 2) Environment Setup
 
-Create `.env` in the repo root:
+Create `.env` in the repo root (see `.env.example` for all options):
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-> Note: `docker-compose.yml` expects `GROQ_API_KEY`.
+> Get a free Groq API key at [console.groq.com/keys](https://console.groq.com/keys).
+> The app refuses to start without it (clear error message at startup).
 
 ### 3) Run with Docker
 
@@ -121,6 +122,23 @@ Open: [http://localhost:8000](http://localhost:8000)
 - `GET /api/tts?text=...` - generate/stream TTS audio
 - `GET /api/todos` - list stored to-dos
 - `GET /api/memories` - list stored memories
+
+## Deploying to Hugging Face Spaces
+
+The Space runs the Docker SDK with `app_port: 8000`.
+
+1. Create a Space (SDK: **Docker**) and push this repo to it.
+2. Go to **Space → Settings → Variables and secrets** and add a **secret**:
+   - Name: `GROQ_API_KEY` — Value: your Groq key.
+3. Restart the Space (Settings → **Restart Space**) after changing secrets.
+
+### If the deployed app returns errors
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Chat replies with `401 - Invalid API Key` | Missing/expired `GROQ_API_KEY` secret in the Space | Re-add the secret under Settings → Variables and secrets, then restart the Space |
+| Space shows `Runtime error` / builds forever | Dependency or startup failure | Check the Space **Logs** tab; the app now fails fast with a clear config message |
+| Frontend loads but voice features fail | Browser blocked the microphone | Allow mic access for the `*.hf.space` domain |
 
 ## Development Notes
 

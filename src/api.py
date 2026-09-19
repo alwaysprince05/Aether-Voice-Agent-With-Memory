@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from openai import OpenAI
 import tempfile
 
-from src.config import config
+from src.config import config, validate_config
 from src.todo_manager import ToDoManager
 from src.memory_system import MemorySystem
 from src.agent_core import AgentCore
@@ -50,6 +50,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Fail fast with a clear message if required configuration is missing
+# (e.g. GROQ_API_KEY not set in the environment / deployment secrets).
+validate_config(config)
 
 # Initialize Agent Components globally
 openai_client = OpenAI(

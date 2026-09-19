@@ -80,7 +80,7 @@ class ToDoManager:
         )
         
         self._todos[todo_id] = item
-        self._save_to_file()
+        self._sync(item=item)
         return item
     
     def get_todo(self, todo_id: str) -> ToDoItem:
@@ -150,7 +150,7 @@ class ToDoManager:
         # Update timestamp
         item.updated_at = datetime.now()
         
-        self._save_to_file()
+        self._sync(item=item)
         return item
     
     def delete_todo(self, todo_id: str) -> bool:
@@ -169,7 +169,7 @@ class ToDoManager:
             raise KeyError(f"To-do item {todo_id} not found")
         
         del self._todos[todo_id]
-        self._save_to_file()
+        self._sync(delete_id=todo_id)
         return True
     
     def _load_from_file(self) -> None:
@@ -223,38 +223,6 @@ class ToDoManager:
 
         # Fallback to local file
         self._save_to_file()
-
-    def create_todo(self, description: str) -> ToDoItem:
-        if not description or not description.strip():
-            raise ValueError("Description cannot be empty")
-        now = datetime.now()
-        todo_id = str(uuid.uuid4())
-        item = ToDoItem(id=todo_id, description=description, status="pending", created_at=now, updated_at=now)
-        self._todos[todo_id] = item
-        self._sync(item=item)
-        return item
-    
-    def update_todo(self, todo_id: str, description: Optional[str] = None, status: Optional[str] = None) -> ToDoItem:
-        if todo_id not in self._todos:
-            raise KeyError(f"To-do item {todo_id} not found")
-        item = self._todos[todo_id]
-        if description is not None:
-            if not description or not description.strip(): raise ValueError("Description cannot be empty")
-            item.description = description
-        if status is not None:
-            if status not in ToDoItem.VALID_STATUSES:
-                raise ValueError(f"Invalid status '{status}'. Must be one of: {', '.join(sorted(ToDoItem.VALID_STATUSES))}")
-            item.status = status
-        item.updated_at = datetime.now()
-        self._sync(item=item)
-        return item
-    
-    def delete_todo(self, todo_id: str) -> bool:
-        if todo_id not in self._todos:
-            raise KeyError(f"To-do item {todo_id} not found")
-        del self._todos[todo_id]
-        self._sync(delete_id=todo_id)
-        return True
 
     def _save_to_file(self) -> None:
         """Save to-do items to JSON file."""

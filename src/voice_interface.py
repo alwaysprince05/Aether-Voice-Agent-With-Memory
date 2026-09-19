@@ -87,8 +87,10 @@ class VoiceInterface:
                 "sounddevice package not installed. Install with: pip install sounddevice"
             )
         
-        from src.config import config
-        self.api_key = api_key or config.openai_api_key
+        # Resolve the API key: explicit argument -> environment variable.
+        # (Kept independent from src.config so this module works in isolation,
+        # including in unit tests that patch os.getenv.)
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
         if not self.api_key:
             raise VoiceInterfaceError(
                 "Groq/OpenAI API key not provided. Set GROQ_API_KEY environment variable."
@@ -276,12 +278,17 @@ class VoiceInterface:
                 raise TTSError("Text cannot be empty")
             
             import io
-            import subprocess
             try:
                 from gtts import gTTS
             except ImportError:
                 raise TTSError(
                     "gTTS package not installed. Install with: pip install gTTS"
+                )
+            try:
+                from pydub import AudioSegment
+            except ImportError:
+                raise TTSError(
+                    "pydub package not installed. Install with: pip install pydub"
                 )
             
             # Call gTTS API
@@ -292,31 +299,26 @@ class VoiceInterface:
             tts.write_to_fp(mp3_fp)
             mp3_fp.seek(0)
             
-            # Use ffmpeg directly to convert MP3 to WAV without pydub
-            # This is more robust as it uses the system binary we just installed
-            process = subprocess.Popen(
-                ['ffmpeg', '-i', 'pipe:0', '-f', 'wav', 'pipe:1'],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
+            # Decode MP3 -> raw PCM samples via pydub (uses ffmpeg under the hood)
+            segment = AudioSegment.from_mp3(mp3_fp)
+            samples = np.array(segment.get_array_of_samples(), dtype=np.float32)
             
-            wav_data, _ = process.communicate(input=mp3_fp.read())
+            # Normalize raw sample values to [-1, 1] for playback
+            try:
+                max_value = float(2 ** (8 * int(segment.sample_width) - 1))
+            except (TypeError, ValueError):
+                max_value = 32768.0
+            samples = samples / max_value
             
-            import wave
-            with wave.open(io.BytesIO(wav_data), 'rb') as wav_file:
-                sample_rate = wav_file.getframerate()
-                n_frames = wav_file.getnframes()
-                frames = wav_file.readframes(n_frames)
-                
-                # Convert raw bytes to numpy array
-                samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32)
-                samples = samples / 32768.0  # Normalize int16 to [-1, 1]
-                
-                return AudioData(data=samples, sample_rate=sample_rate)
+            return AudioData(data=samples, sample_rate=segment.frame_rate)
         
+        except TTSError:
+            raise
         except Exception as e:
-            raise TTSError(f"Text-to-speech conversion failed: {str(e)}")
+            error_msg = str(e)
+            if "network" in error_msg.lower() or "connection" in error_msg.lower():
+                raise TTSError(f"Network error during text-to-speech: {error_msg}")
+            raise TTSError(f"Text-to-speech conversion failed: {error_msg}")
     
     def play_audio(self, audio: AudioData) -> None:
         """Plays audio through speakers.

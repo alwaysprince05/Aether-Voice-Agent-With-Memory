@@ -6,7 +6,7 @@ import sys
 from typing import Optional
 from openai import OpenAI
 
-from src.config import config
+from src.config import config, validate_config
 from src.todo_manager import ToDoManager
 from src.memory_system import MemorySystem
 from src.voice_interface import VoiceInterface
@@ -22,6 +22,9 @@ class VoiceAgent:
         """
         self._session_id = str(uuid.uuid4())
         self._text_mode = text_mode
+        
+        # Fail fast with a clear message if GROQ_API_KEY is missing
+        validate_config(config)
         
         openai_client = OpenAI(
             api_key=config.groq_api_key,
