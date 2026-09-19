@@ -33,6 +33,10 @@ class MemorySystem:
         """
         self._memories: Dict[str, Memory] = {}
 
+        # Lazy sentence-transformers handle — must be initialized in ALL modes
+        # (including MongoDB mode) so _generate_embedding never hits AttributeError.
+        self._st_model = None
+
         # Cloud Persistence Check
         self._mongo_uri = os.environ.get("MONGO_URI")
         self._db = None
@@ -41,22 +45,23 @@ class MemorySystem:
         if self._mongo_uri:
             try:
                 from pymongo import MongoClient
-                client = MongoClient(self._mongo_uri)
+                client = MongoClient(self._mongo_uri, serverSelectionTimeoutMS=8000)
                 self._db = client.get_database("aether")
                 self._collection = self._db.get_collection("memories")
-                print("[AETHER] Connected to Cloud Persistence (MongoDB)")
+                # find() triggers the real connection — a failure here raises and
+                # sends us to the local-file fallback below.
                 self._load_from_mongo()
+                print("[AETHER] Connected to Cloud Persistence (MongoDB)")
                 return
             except Exception as e:
                 print(f"[AETHER] Failed to connect to MongoDB: {e}. Falling back to local storage.")
+                self._collection = None
+                self._db = None
 
         # Set storage path
         if storage_path is None:
             storage_path = os.path.expanduser("~/.voice-agent/memories.json")
         self._storage_path = storage_path
-
-        # Lazy sentence-transformers handle (loaded on first embedding call)
-        self._st_model = None
 
         # Load existing memories from file
         self._load_from_file()
@@ -258,7 +263,9 @@ class MemorySystem:
 
     def _sync(self, item: Optional[Memory] = None, clear_all: bool = False) -> None:
         """Synchronize changes to the storage backend (File or MongoDB)."""
-        if self._collection:
+        # NOTE: pymongo Collection objects raise NotImplementedError when evaluated
+        # for truthiness — always compare with None instead of `if collection:`.
+        if self._collection is not None:
             try:
                 if clear_all:
                     self._collection.delete_many({})

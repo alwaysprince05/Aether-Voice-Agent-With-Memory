@@ -10,6 +10,7 @@ uvicorn>=0.30.0
 gunicorn>=22.0.0
 python-multipart>=0.0.9
 pymongo>=4.0.0
+dnspython>=2.4.0
 numpy>=1.26.0
 sounddevice>=0.4.6
 sentence-transformers>=2.7.0

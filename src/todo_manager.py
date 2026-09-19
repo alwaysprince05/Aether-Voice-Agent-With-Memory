@@ -28,14 +28,18 @@ class ToDoManager:
         if self._mongo_uri:
             try:
                 from pymongo import MongoClient
-                client = MongoClient(self._mongo_uri)
+                client = MongoClient(self._mongo_uri, serverSelectionTimeoutMS=8000)
                 self._db = client.get_database("aether")
                 self._collection = self._db.get_collection("todos")
-                print("[AETHER] Connected to Cloud Persistence (MongoDB)")
+                # find() triggers the real connection — a failure here raises and
+                # sends us to the local-file fallback below.
                 self._load_from_mongo()
+                print("[AETHER] Connected to Cloud Persistence (MongoDB)")
                 return
             except Exception as e:
                 print(f"[AETHER] Failed to connect to MongoDB: {e}. Falling back to local storage.")
+                self._collection = None
+                self._db = None
 
         # Set storage path
         if storage_path is None:
@@ -211,7 +215,9 @@ class ToDoManager:
     
     def _sync(self, item: Optional[ToDoItem] = None, delete_id: Optional[str] = None) -> None:
         """Synchronize changes to the storage backend (File or MongoDB)."""
-        if self._collection:
+        # NOTE: pymongo Collection objects raise NotImplementedError when evaluated
+        # for truthiness — always compare with None instead of `if collection:`.
+        if self._collection is not None:
             try:
                 if delete_id:
                     self._collection.delete_one({"id": delete_id})

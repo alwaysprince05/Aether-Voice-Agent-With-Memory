@@ -94,6 +94,17 @@ GROQ_API_KEY=your_groq_api_key_here
 > Get a free Groq API key at [console.groq.com/keys](https://console.groq.com/keys).
 > The app refuses to start without it (clear error message at startup).
 
+### 3) Data Persistence (Recommended for Deployment)
+
+By default, tasks and memories are stored as JSON files in `DATA_DIR` — which is **wiped on every Hugging Face Space rebuild**. To persist data forever, set the `MONGO_URI` environment variable/secret:
+
+- **Local**: `MONGO_URI=mongodb://localhost:27017`
+- **Cloud (free)**: create an M0 cluster at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas), allow access from anywhere (`0.0.0.0/0`), and use the connection string as `MONGO_URI`
+
+When `MONGO_URI` is set, todos and memories live in the `aether` database (collections: `todos`, `memories`) and automatically reload on startup. If MongoDB is unreachable, the app falls back to JSON files gracefully.
+
+Add it as a secret the same way as `GROQ_API_KEY` (Space → Settings → Variables and secrets).
+
 ### 3) Run with Docker
 
 ```bash
